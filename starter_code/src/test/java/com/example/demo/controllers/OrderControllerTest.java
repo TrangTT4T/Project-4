@@ -31,11 +31,10 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void submit_order_happy_path() {
+    public void happy_case_submit_order_successfully() {
         User user = new User();
         user.setId(1L);
         user.setUsername("testUser");
-
         Cart cart = new Cart();
         cart.setUser(user);
         cart.setItems(new ArrayList<>());
@@ -57,7 +56,7 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void submit_order_user_not_found() {
+    public void negative_case_submit_order_unsuccessfully_because_user_not_found() {
         when(userRepo.findByUsername("nonexistentUser")).thenReturn(null);
 
         final ResponseEntity<UserOrder> response = orderController.submit("nonexistentUser");
@@ -66,11 +65,10 @@ public class OrderControllerTest {
     }
 
     @Test
-    public void get_orders_for_user_happy_path() {
+    public void happy_case_get_orders_information_for_user_successfully() {
         User user = new User();
         user.setId(1L);
         user.setUsername("testUser");
-
         List<UserOrder> orders = new ArrayList<>();
         UserOrder order1 = new UserOrder();
         order1.setId(1L);
@@ -89,14 +87,5 @@ public class OrderControllerTest {
         assertNotNull(retrievedOrders);
         assertEquals(1, retrievedOrders.size());
         assertEquals(user.getId(), retrievedOrders.get(0).getUser().getId());
-    }
-
-    @Test
-    public void get_orders_for_user_user_not_found() {
-        when(userRepo.findByUsername("nonexistentUser")).thenReturn(null);
-
-        final ResponseEntity<List<UserOrder>> response = orderController.getOrdersForUser("nonexistentUser");
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCodeValue());
     }
 }

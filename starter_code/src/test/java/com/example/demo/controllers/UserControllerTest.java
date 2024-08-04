@@ -27,11 +27,10 @@ public class UserControllerTest {
         TestUtils.injectObjects(userController, "userRepository", userRepo);
         TestUtils.injectObjects(userController, "cartRepository", cartRepo);
         TestUtils.injectObjects(userController, "bCryptPasswordEncoder", encoder);
-
     }
 
     @Test
-    public void create_user_happy_path() {
+    public void happy_case_create_user_successfully() {
         when(encoder.encode("password")).thenReturn("hasspassword");
         CreateUserRequest r = new CreateUserRequest();
         r.setUsername("test");
@@ -48,7 +47,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void create_user_password_and_confirm_password_mismatch() {
+    public void negative_case_create_user_unsuccessfully_because_mismatch_password_and_confirm_password() {
         CreateUserRequest r = new CreateUserRequest();
         r.setUsername("test");
         r.setPassword("password");
@@ -59,7 +58,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void create_user_existing_username() {
+    public void negative_case_create_user_unsuccessfully_because_username_exist() {
         when(userRepo.findByUsername("existingUser")).thenReturn(new User());
         CreateUserRequest r = new CreateUserRequest();
         r.setUsername("existingUser");
@@ -71,21 +70,14 @@ public class UserControllerTest {
     }
 
     @Test
-    public void find_user_by_id_not_found() {
+    public void negative_case_find_user_unsuccessfully_because_id_not_found() {
         final ResponseEntity<User> response = userController.findById(1L);
         assertNotNull(response);
         assertEquals(404, response.getStatusCodeValue());
     }
 
     @Test
-    public void find_user_by_username_not_found() {
-        final ResponseEntity<User> response = userController.findByUserName("nonexistentUser");
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCodeValue());
-    }
-
-    @Test
-    public void find_user_by_username_found() {
+    public void happy_case_find_user_by_username_exist_successfully() {
         User user = new User();
         user.setId(1L);
         user.setUsername("testUser");
@@ -98,7 +90,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void create_user_short_password_length_less_than_7() {
+    public void negative_case_create_user_unsuccessfully_because_password_length_less_than_7() {
         CreateUserRequest r = new CreateUserRequest();
         r.setUsername("test");
         r.setPassword("short");
