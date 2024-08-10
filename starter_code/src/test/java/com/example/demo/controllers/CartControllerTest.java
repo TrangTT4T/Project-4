@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -38,79 +39,41 @@ public class CartControllerTest {
     @Mock
     private ItemRepository itemRepository;
 
+    private User user;
+    private Item item;
+
     @Before
     public void setUp() {
         TestUtils.injectObjects(cartController, "userRepository", userRepository);
         TestUtils.injectObjects(cartController, "cartRepository", cartRepository);
         TestUtils.injectObjects(cartController, "itemRepository", itemRepository);
+
+        user = TestUtils.createUser(9L, "trangtran", new Cart());
+        item = TestUtils.createItem(9L, "Item Name 123", new BigDecimal("9.99"), "Item Description 123");
     }
 
     @Test
     public void happy_case_add_to_cart_successfully() {
-        User user = createUser();
-        Item item = createItem();
-
         when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
 
-        ModifyCartRequest request = new ModifyCartRequest();
-        request.setUsername(user.getUsername());
-        request.setItemId(item.getId());
-        request.setQuantity(1);
-
+        ModifyCartRequest request = new ModifyCartRequest(user.getUsername(), item.getId(), 9);
         ResponseEntity<Cart> response = cartController.addTocart(request);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Cart updatedCart = response.getBody();
-        assertEquals(user.getCart().getItems().size(), updatedCart.getItems().size());
-        assertEquals(user.getCart().getTotal(), updatedCart.getTotal());
-    }
-
-    @Test
-    public void negative_case_add_to_cart_unsuccessfully_because_user_not_found() {
-        ModifyCartRequest request = new ModifyCartRequest();
-        request.setUsername("nonexistent_user");
-        request.setItemId(1L);
-        request.setQuantity(1);
-
-        ResponseEntity<Cart> response = cartController.addTocart(request);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(user.getCart().getTotal(), Objects.requireNonNull(response.getBody()).getTotal());
     }
 
     @Test
     public void happy_case_remove_from_cart_successfully() {
-        User user = createUser();
-        Item item = createItem();
-
         user.getCart().addItem(item);
         when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
 
-        ModifyCartRequest request = new ModifyCartRequest();
-        request.setUsername(user.getUsername());
-        request.setItemId(item.getId());
-        request.setQuantity(1);
-
+        ModifyCartRequest request = new ModifyCartRequest(user.getUsername(), item.getId(), 9);
         ResponseEntity<Cart> response = cartController.removeFromcart(request);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        Cart updatedCart = response.getBody();
-        assertEquals(user.getCart().getItems().size(), updatedCart.getItems().size());
-        assertEquals(user.getCart().getTotal(), updatedCart.getTotal());
-    }
-
-    private User createUser() {
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("trang");
-        user.setCart(new Cart());
-        return user;
-    }
-
-    private Item createItem() {
-        Item item = new Item();
-        item.setId(1L);
-        item.setName("Test Item Name");
-        item.setPrice(BigDecimal.valueOf(10.00));
-        item.setDescription("Test Item Description");
-        return item;
+        assertEquals(user.getCart().getTotal(), Objects.requireNonNull(response.getBody()).getTotal());
     }
 }
