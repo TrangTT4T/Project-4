@@ -15,9 +15,11 @@ import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,72 +31,54 @@ public class ItemControllerTest {
     @Mock
     private ItemRepository itemRepository;
 
+    private Item item1;
+    private Item item2;
+
     @BeforeEach
     public void setUp() {
         itemController = new ItemController();
+        item1 = TestUtils.createItem(9L, "Item Name 1", new BigDecimal("9.99"), "Item Description 1");
+        item2 = TestUtils.createItem(99L, "Item Name 2", new BigDecimal("99.99"), "Item Description 2");
         TestUtils.injectObjects(itemController, "itemRepository", itemRepository);
     }
 
     @Test
     public void happy_case_get_all_items_successfully() {
-        List<Item> items = new ArrayList<>();
-        items.add(createItem(1L, "Item 1", new BigDecimal("10.00"), "Description of Item 1"));
-        items.add(createItem(2L, "Item 2", new BigDecimal("20.00"), "Description of Item 2"));
-
-        when(itemRepository.findAll()).thenReturn(items);
+        when(itemRepository.findAll()).thenReturn(List.of(item1, item2));
         ResponseEntity<List<Item>> responseEntity = itemController.getItems();
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(2, responseEntity.getBody().size());
+        assertEquals(2, Objects.requireNonNull(responseEntity.getBody()).size());
     }
 
     @Test
     public void happy_case_get_an_item_by_id_successfully() {
-        Long itemId = 1L;
-        Item item = createItem(itemId, "Item 1", new BigDecimal("10.00"), "Description of Item 1");
-
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        ResponseEntity<Item> responseEntity = itemController.getItemById(itemId);
+        when(itemRepository.findById(9L)).thenReturn(Optional.of(item1));
+        ResponseEntity<Item> responseEntity = itemController.getItemById(9L);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(item.getId(), responseEntity.getBody().getId());
+        assertEquals(item1.getId(), Objects.requireNonNull(responseEntity.getBody()).getId());
     }
 
     @Test
     public void negative_case_get_an_item_unsuccessfully_because_id_not_found() {
-        Long itemId = 1L;
-
-        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
-        ResponseEntity<Item> responseEntity = itemController.getItemById(itemId);
+        when(itemRepository.findById(9L)).thenReturn(Optional.empty());
+        ResponseEntity<Item> responseEntity = itemController.getItemById(9L);
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
     }
 
     @Test
     public void happy_case_get_items_by_name_successfully() {
-        String itemName = "Item";
-        List<Item> items = new ArrayList<>();
-        items.add(createItem(1L, "Item 1", new BigDecimal("10.00"), "Description of Item 1"));
-        items.add(createItem(2L, "Item 2", new BigDecimal("20.00"), "Description of Item 2"));
-
-        when(itemRepository.findByName(itemName)).thenReturn(items);
-        ResponseEntity<List<Item>> responseEntity = itemController.getItemsByName(itemName);
+        when(itemRepository.findByName("Item Name 1")).thenReturn(List.of(item1));
+        ResponseEntity<List<Item>> responseEntity = itemController.getItemsByName("Item Name 1");
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(2, responseEntity.getBody().size());
+        assertEquals(item1.getName(), Objects.requireNonNull(responseEntity.getBody()).get(0).getName());
     }
 
     @Test
     public void negative_case_get_items_unsuccessfully_because_name_not_found() {
-        String itemName = "Item";
-
-        when(itemRepository.findByName(itemName)).thenReturn(new ArrayList<>());
-        ResponseEntity<List<Item>> responseEntity = itemController.getItemsByName(itemName);
+        when(itemRepository.findByName("Item Not Found")).thenReturn(new ArrayList<>());
+        ResponseEntity<List<Item>> responseEntity = itemController.getItemsByName("Item Not Found");
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-    }
-
-    private Item createItem(Long id, String name, BigDecimal price, String description) {
-        Item item = new Item();
-        item.setId(id);
-        item.setName(name);
-        item.setPrice(price);
-        item.setDescription(description);
-        return item;
+        assertNull(responseEntity.getBody());
     }
 }
