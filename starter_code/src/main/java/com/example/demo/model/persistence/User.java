@@ -33,7 +33,14 @@ public class User {
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
 	@JsonIgnore
     private Cart cart;
-	
+
+	public User(){}
+
+	public User(long id, String username) {
+		this.id = id;
+		this.username = username;
+	}
+
 	public Cart getCart() {
 		return cart;
 	}

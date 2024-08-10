@@ -7,97 +7,83 @@ import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.CreateUserRequest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Objects;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class UserControllerTest {
     private UserController userController;
-    private final UserRepository userRepo = mock(UserRepository.class);
-    private final CartRepository cartRepo = mock(CartRepository.class);
-    private final BCryptPasswordEncoder encoder = mock(BCryptPasswordEncoder.class);
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private CartRepository cartRepository;
+    @Mock
+    private BCryptPasswordEncoder encoder;
 
     @Before
     public void setUp() {
         userController = new UserController();
-        TestUtils.injectObjects(userController, "userRepository", userRepo);
-        TestUtils.injectObjects(userController, "cartRepository", cartRepo);
+        TestUtils.injectObjects(userController, "userRepository", userRepository);
+        TestUtils.injectObjects(userController, "cartRepository", cartRepository);
         TestUtils.injectObjects(userController, "bCryptPasswordEncoder", encoder);
     }
 
     @Test
     public void happy_case_create_user_successfully() {
         when(encoder.encode("password")).thenReturn("hasspassword");
-        CreateUserRequest r = new CreateUserRequest();
-        r.setUsername("test");
-        r.setPassword("password");
-        r.setConfirmPassword("password");
-        final ResponseEntity<User> response = userController.createUser(r);
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
-        User u = response.getBody();
-        assertNotNull(u);
-        assertEquals(0, u.getId());
-        assertEquals("test", u.getUsername());
-        assertEquals("hasspassword", u.getPassword());
+
+        CreateUserRequest request = new CreateUserRequest("test", "password", "password");
+        ResponseEntity<User> responseEntity = userController.createUser(request);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("test", Objects.requireNonNull(responseEntity.getBody()).getUsername());
+        assertEquals("hasspassword", responseEntity.getBody().getPassword());
     }
 
     @Test
     public void negative_case_create_user_unsuccessfully_because_mismatch_password_and_confirm_password() {
-        CreateUserRequest r = new CreateUserRequest();
-        r.setUsername("test");
-        r.setPassword("password");
-        r.setConfirmPassword("differentpassword");
-        final ResponseEntity<User> response = userController.createUser(r);
-        assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        CreateUserRequest request = new CreateUserRequest("test", "password", "differentpassword");
+        ResponseEntity<User> responseEntity = userController.createUser(request);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
     @Test
     public void negative_case_create_user_unsuccessfully_because_username_exist() {
-        when(userRepo.findByUsername("existingUser")).thenReturn(new User());
-        CreateUserRequest r = new CreateUserRequest();
-        r.setUsername("existingUser");
-        r.setPassword("password");
-        r.setConfirmPassword("password");
-        final ResponseEntity<User> response = userController.createUser(r);
-        assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        when(userRepository.findByUsername("existingUser")).thenReturn(new User());
+
+        CreateUserRequest request = new CreateUserRequest("existingUser", "password", "password");
+        ResponseEntity<User> responseEntity = userController.createUser(request);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
     @Test
     public void negative_case_find_user_unsuccessfully_because_id_not_found() {
-        final ResponseEntity<User> response = userController.findById(1L);
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCodeValue());
+        ResponseEntity<User> responseEntity = userController.findById(9L);
+        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
     }
 
     @Test
     public void happy_case_find_user_by_username_exist_successfully() {
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testUser");
-        when(userRepo.findByUsername("testUser")).thenReturn(user);
+        User user = new User(9L, "test");
+        when(userRepository.findByUsername("test")).thenReturn(user);
 
-        final ResponseEntity<User> response = userController.findByUserName("testUser");
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("testUser", response.getBody().getUsername());
+        ResponseEntity<User> responseEntity = userController.findByUserName("test");
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("test", Objects.requireNonNull(responseEntity.getBody()).getUsername());
     }
 
     @Test
     public void negative_case_create_user_unsuccessfully_because_password_length_less_than_7() {
-        CreateUserRequest r = new CreateUserRequest();
-        r.setUsername("test");
-        r.setPassword("short");
-        r.setConfirmPassword("short");
-        final ResponseEntity<User> response = userController.createUser(r);
-        assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        CreateUserRequest request = new CreateUserRequest("test", "short", "short");
+        ResponseEntity<User> responseEntity = userController.createUser(request);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
-
 }
