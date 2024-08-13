@@ -182,3 +182,23 @@
 2024-08-10T21:43:51.356+0700 [main] INFO  com.example.demo.controllers.OrderController - User not found for order submit: notfounduser
 2024-08-10T21:43:51.359+0700 [main] INFO  com.example.demo.controllers.OrderController - Order submitted successfully for user: trangtran
 2024-08-10T21:43:51.361+0700 [main] INFO  com.example.demo.controllers.OrderController - Retrieved order history for user: trangtran
+2024-08-10T21:46:13.996+0700 [main] INFO  com.example.demo.controllers.OrderController - Retrieved item with ID: 9
+2024-08-10T21:46:14.024+0700 [main] INFO  com.example.demo.controllers.OrderController - No items found with name: Item Not Found
+2024-08-10T21:46:14.030+0700 [main] INFO  com.example.demo.controllers.OrderController - Retrieved all items from the database.
+2024-08-10T21:46:14.033+0700 [main] INFO  com.example.demo.controllers.OrderController - Item not found for ID: 9
+2024-08-10T21:46:14.037+0700 [main] INFO  com.example.demo.controllers.OrderController - Retrieved 1 items with name: Item Name 1
+2024-08-10T21:46:14.163+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to find user by username: test
+2024-08-10T21:46:14.164+0700 [main] INFO  com.example.demo.controllers.UserController - User found with username test: 9
+2024-08-10T21:46:14.167+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to create user with username: test
+2024-08-10T21:46:14.168+0700 [main] INFO  com.example.demo.controllers.UserController - Password validation failed for username have length less than 7: test
+2024-08-10T21:46:14.170+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to create user with username: existingUser
+2024-08-10T21:46:14.171+0700 [main] INFO  com.example.demo.controllers.UserController - Username already exists: existingUser
+2024-08-10T21:46:14.174+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to create user with username: test
+2024-08-10T21:46:14.174+0700 [main] INFO  com.example.demo.controllers.UserController - Password validation failed for username have length less than 7: test
+2024-08-10T21:46:14.178+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to create user with username: test
+2024-08-10T21:46:14.179+0700 [main] INFO  com.example.demo.controllers.UserController - User created successfully with username: test
+2024-08-10T21:46:14.180+0700 [main] INFO  com.example.demo.controllers.UserController - Attempting to find user with ID: 9
+2024-08-10T21:46:14.182+0700 [main] INFO  com.example.demo.controllers.UserController - User not found with ID: 9
+2024-08-10T21:46:14.236+0700 [main] INFO  com.example.demo.controllers.OrderController - User not found for order submit: notfounduser
+2024-08-10T21:46:14.243+0700 [main] INFO  com.example.demo.controllers.OrderController - Order submitted successfully for user: trangtran
+2024-08-10T21:46:14.246+0700 [main] INFO  com.example.demo.controllers.OrderController - Retrieved order history for user: trangtran
